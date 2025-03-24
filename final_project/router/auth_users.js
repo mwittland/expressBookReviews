@@ -49,7 +49,7 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   const review = req.query.review;
-  const username = req.session.username;
+  const username = req.session.authorization.username;
   const isbn = req.params.isbn;
   if (!username) {
     return res.status(401).json({ message: "User not logged in" });
@@ -64,6 +64,15 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   // Add or update the review for this user
   books[isbn].reviews[username] = review;
   res.send("Review successfully added/updated");
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const username = req.session.authorization.username;
+    const isbn = req.params.isbn;
+    if (books[isbn].reviews[username]) {
+        delete books[isbn].reviews[username];
+    }
+    res.send("Your review has been deleted");
 });
 
 module.exports.authenticated = regd_users;
