@@ -1,9 +1,13 @@
 const express = require('express');
-let books = require("./booksdb.js");
+//let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+// new code
+let fs = require('fs');
+let path = require('path');
+let filename = path.join(__dirname, 'booksdb.json');
 
 public_users.post("/register", (req,res) => {
     const username = req.body.username;
@@ -40,14 +44,32 @@ const doesExist = (username) => {
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
   //Write your code here
+  /*
   res.send(JSON.stringify(books, null, 4));
+  */
+  //new code
+  fs.readFile(filename, (err, data) => {
+    if (err) {
+        res.send("Error getting book info: " + err.message);
+    } else {
+        let books = JSON.parse(data);
+        res.send(JSON.stringify(books, null, 4));
+    }
+  });
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   //Write your code here
   const isbn = req.params.isbn;
-  res.send(books[isbn]);
+  fs.readFile(filename, (err, data) => {
+    if (err) {
+        res.send("Error getting book info: " + err.message);
+    } else {
+        let books = JSON.parse(data);
+        res.send(books[isbn]);
+    }
+  });
  });
   
 // Get book details based on author
@@ -55,12 +77,19 @@ public_users.get('/author/:author',function (req, res) {
   //Write your code here
   const author = req.params.author;
   let filtered_books = [];
-  for (const key in books) {
-    if (books[key].author.toLowerCase() === author) {
-        filtered_books.push(books[key]);
+  fs.readFile(filename, (err, data) => {
+    if (err) {
+        res.send("Error getting book info: " + err.message);
+    } else {
+        let books = JSON.parse(data);
+        for (const key in books) {
+            if (books[key].author.toLowerCase() === author) {
+                filtered_books.push(books[key]);
+            }
+        }
+        res.send(filtered_books);
     }
-  }
-  res.send(filtered_books);
+  });
 });
 
 // Get all books based on title
@@ -68,12 +97,19 @@ public_users.get('/title/:title',function (req, res) {
   //Write your code here
   const title = req.params.title;
   let filtered_books = [];
-  for (const key in books) {
-    if (books[key].title === title) {
-        filtered_books.push(books[key]);
+  fs.readFile(filename, (err, data) => {
+    if (err) {
+        res.send("Error getting book info: " + err.message);
+    } else {
+        let books = JSON.parse(data);
+        for (const key in books) {
+            if (books[key].title === title) {
+                filtered_books.push(books[key]);
+            }
+          }
+          res.send(filtered_books);
     }
-  }
-  res.send(filtered_books);
+  });
 });
 
 //  Get book review
